@@ -1,2 +1,2 @@
 # Smart-Mirror
-Raspberry powered mirror which can display news, weather, calendar events
+Raspberry powered mirror which can display news, weather, time
