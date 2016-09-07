@@ -1,4 +1,4 @@
 # Smart-Mirror
-Raspberry powered mirror which can display news, weather, time
+Raspberry powered mirror which can display the news, weather, and time.
 
-[More information here](https://youtu.be/fkVBAcvbrjU)
+[![Link to youtube how-to video](http://i.imgur.com/cMyaSHT.png)](https://youtu.be/fkVBAcvbrjU)
