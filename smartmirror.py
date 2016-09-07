@@ -105,7 +105,7 @@ class Weather(Frame):
     def get_weather(self):
         try:
             # get location
-            location_req_url = "http://freegeoip.net/json/%s" % get_ip()
+            location_req_url = "http://freegeoip.net/json/%s" % self.get_ip()
             r = requests.get(location_req_url)
             location_obj = json.loads(r.text)
 
