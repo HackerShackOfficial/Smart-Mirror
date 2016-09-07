@@ -154,8 +154,12 @@ class Weather(Frame):
                 self.temperature = temperature2
                 self.temperatureLbl.config(text=temperature2)
             if self.location != location2:
-                self.location = location2
-                self.locationLbl.config(text=location2)
+                if location2 == ", ":
+                    self.location = "Cannot Pinpoint Location"
+                    self.locationLbl.config(text="Cannot Pinpoint Location")
+                else:
+                    self.location = location2
+                    self.locationLbl.config(text=location2)
         except Exception as e:
             traceback.print_exc()
             print "Error: %s. Cannot get weather." % e
