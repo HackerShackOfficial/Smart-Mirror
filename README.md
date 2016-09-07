@@ -10,4 +10,5 @@ Installation is simple as running the following command.
 To run the application run the following command
 > python -m smartmirror
 
+## Demo and Build Instructions
 [![Link to youtube how-to video](http://i.imgur.com/cMyaSHT.png)](https://youtu.be/fkVBAcvbrjU)
