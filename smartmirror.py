@@ -10,8 +10,7 @@ import traceback
 import feedparser
 from PIL import Image, ImageTk
 
-ip = '<IP>'
-country_code = 'us'
+country_code = None  # set this here if you don't want news from your current location
 weather_api_token = '<TOKEN>'
 
 
@@ -95,12 +94,13 @@ class Weather(Frame):
     def get_weather(self):
         try:
             # get location
-            location_req_url = "http://freegeoip.net/json/%s" % ip
+            location_req_url = "http://freegeoip.net/json"
             r = requests.get(location_req_url)
             location_obj = json.loads(r.text)
 
             lat = location_obj['latitude']
             lon = location_obj['longitude']
+            country_code = location_obj['country_code']
 
             location2 = "%s, %s" % (location_obj['city'], location_obj['region_code'])
 
