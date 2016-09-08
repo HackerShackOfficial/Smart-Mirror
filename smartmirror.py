@@ -91,11 +91,21 @@ class Weather(Frame):
         self.locationLbl = Label(self, font=('Helvetica', 18), fg="white", bg="black")
         self.locationLbl.pack(side=TOP, anchor=W)
         self.get_weather()
+        
+    def get_ip(self):
+        try:
+            ip_url = "http://jsonip.com/"
+            req = requests.get(ip_url)
+            ip_json = json.loads(req.text)
+            return ip_json['ip']
+        except Exception as e:
+            traceback.print_exc()
+            return "Error: %s. Cannot get ip." % e
 
     def get_weather(self):
         try:
             # get location
-            location_req_url = "http://freegeoip.net/json/%s" % ip
+            location_req_url = "http://freegeoip.net/json/%s" % self.get_ip()
             r = requests.get(location_req_url)
             location_obj = json.loads(r.text)
 
@@ -144,8 +154,12 @@ class Weather(Frame):
                 self.temperature = temperature2
                 self.temperatureLbl.config(text=temperature2)
             if self.location != location2:
-                self.location = location2
-                self.locationLbl.config(text=location2)
+                if location2 == ", ":
+                    self.location = "Cannot Pinpoint Location"
+                    self.locationLbl.config(text="Cannot Pinpoint Location")
+                else:
+                    self.location = location2
+                    self.locationLbl.config(text=location2)
         except Exception as e:
             traceback.print_exc()
             print "Error: %s. Cannot get weather." % e
