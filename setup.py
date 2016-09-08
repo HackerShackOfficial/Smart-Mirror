@@ -13,6 +13,13 @@ if os.getuid() != 0:
 print('INFO: Checking and installing requirements')
 os.system('! dpkg -S python-imaging-tk && apt-get -y install python-imaging-tk')
 
+# Generate the requirements from the file for old instructions
+print('INFO: Generating the requirements from requirements.txt')
+packages = []
+for line in open('requirements.txt', 'r'):
+    if not line.startswith('#'):
+        packages.append(line.strip())
+
 # Run setuptools for pip
 setup(
     name='smartmirror',
@@ -20,6 +27,6 @@ setup(
     description='Raspberry powered mirror which can display news, weather, calendar events',
     author='HackerHouse',
     url='https://github.com/HackerHouseYT/Smart-Mirror',
-    install_requires=['requests', 'feedparser', 'Pillow'],
-    packages = find_packages(),
+    install_requires=packages,
+    packages=find_packages(),
 )
