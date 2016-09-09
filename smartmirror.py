@@ -10,9 +10,8 @@ import traceback
 import feedparser
 from PIL import Image, ImageTk
 
-ip = '<IP>'
 country_code = 'us'
-weather_api_token = '<TOKEN>'
+weather_api_token = open('weather_api_token.txt', 'r').read().strip()
 
 
 # maps open weather icons to
@@ -91,7 +90,7 @@ class Weather(Frame):
         self.locationLbl = Label(self, font=('Helvetica', 18), fg="white", bg="black")
         self.locationLbl.pack(side=TOP, anchor=W)
         self.get_weather()
-        
+
     def get_ip(self):
         try:
             ip_url = "http://jsonip.com/"
@@ -191,7 +190,7 @@ class News(Frame):
                 headlines_url = "https://news.google.com/news?ned=us&output=rss"
             else:
                 headlines_url = "https://news.google.com/news?ned=%s&output=rss" % country_code
-                
+
             feed = feedparser.parse(headlines_url)
 
             for post in feed.entries[0:5]:
