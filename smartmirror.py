@@ -8,17 +8,21 @@ import requests
 import json
 import traceback
 import feedparser
+import urllib
+import icalendar
 from PIL import Image, ImageTk
 
 ip = '<IP>'
-country_code = 'us'
-weather_api_token = '<TOKEN>'
+country_code = 'tr'
+weather_api_token = ''  # Get your token from forecast.io
+calendar_url = ''  # You can get your url from Google Calendar
 
+urllib.urlretrieve(calendar_url, "ical.ics")
 
 # maps open weather icons to
 icon_lookup = {
     'clear-day': "assets/Sun.png",  # clear sky day
-    'wind': "assets/Wind.png",   #wind
+    'wind': "assets/Wind.png",   # wind
     'cloudy': "assets/Cloud.png",  # cloudy day
     'partly-cloudy-day': "assets/PartlySunny.png",  # partly cloudy day
     'rain': "assets/Rain.png",  # rain day
@@ -91,7 +95,7 @@ class Weather(Frame):
         self.locationLbl = Label(self, font=('Helvetica', 18), fg="white", bg="black")
         self.locationLbl.pack(side=TOP, anchor=W)
         self.get_weather()
-        
+
     def get_ip(self):
         try:
             ip_url = "http://jsonip.com/"
@@ -115,11 +119,11 @@ class Weather(Frame):
             location2 = "%s, %s" % (location_obj['city'], location_obj['region_code'])
 
             # get weather
-            weather_req_url = "https://api.darksky.net/forecast/%s/%s,%s" % (weather_api_token, lat,lon)
+            weather_req_url = "https://api.forecast.io/forecast/%s/%s,%s" % (weather_api_token, lat, lon)
             r = requests.get(weather_req_url)
             weather_obj = json.loads(r.text)
 
-            degree_sign= u'\N{DEGREE SIGN}'
+            degree_sign = u'\N{DEGREE SIGN}'
             temperature2 = "%s%s" % (str(int(weather_obj['currently']['temperature'])), degree_sign)
             currently2 = weather_obj['currently']['summary']
             forecast2 = weather_obj["hourly"]["summary"]
@@ -187,11 +191,11 @@ class News(Frame):
             # remove all children
             for widget in self.headlinesContainer.winfo_children():
                 widget.destroy()
-            if country_code == None:
-                headlines_url = "https://news.google.com/news?ned=us&output=rss"
+            if country_code is None:
+                headlines_url = "https://news.google.com/news?ned=TR&output=rss"
             else:
                 headlines_url = "https://news.google.com/news?ned=%s&output=rss" % country_code
-                
+
             feed = feedparser.parse(headlines_url)
 
             for post in feed.entries[0:5]:
@@ -217,7 +221,7 @@ class NewsHeadline(Frame):
         self.iconLbl.image = photo
         self.iconLbl.pack(side=LEFT, anchor=N)
 
-        self.eventName = event_name
+        self.eventName = event_name[:50] + "..."
         self.eventNameLbl = Label(self, text=self.eventName, font=('Helvetica', 18), fg="white", bg="black")
         self.eventNameLbl.pack(side=LEFT, anchor=N)
 
@@ -233,16 +237,20 @@ class Calendar(Frame):
         self.get_events()
 
     def get_events(self):
-        #TODO: implement this method
-        # reference https://developers.google.com/google-apps/calendar/quickstart/python
+        g = open('cal.ics', 'rb')
+        gcal = icalendar.Calendar.from_ical(g.read())
+        i = 0
+        for component in gcal.walk():
+            if component.name == "VEVENT":
+                if i == 3:
+                    break
+                i += 1
+                calendar_event = CalendarEvent(self.calendarEventContainer, component.get('summary'))
+                calendar_event.pack(side=TOP, anchor=E)
 
-        # remove all children
-        for widget in self.calendarEventContainer.winfo_children():
-            widget.destroy()
-
-        calendar_event = CalendarEvent(self.calendarEventContainer)
-        calendar_event.pack(side=TOP, anchor=E)
-        pass
+                print(component.get('summary'))
+                print(component.get('dtstart').to_ical())
+        g.close()
 
 
 class CalendarEvent(Frame):
@@ -258,10 +266,10 @@ class FullscreenWindow:
     def __init__(self):
         self.tk = Tk()
         self.tk.configure(background='black')
-        self.topFrame = Frame(self.tk, background = 'black')
-        self.bottomFrame = Frame(self.tk, background = 'black')
-        self.topFrame.pack(side = TOP, fill=BOTH, expand = YES)
-        self.bottomFrame.pack(side = BOTTOM, fill=BOTH, expand = YES)
+        self.topFrame = Frame(self.tk, background='black')
+        self.bottomFrame = Frame(self.tk, background='black')
+        self.topFrame.pack(side=TOP, fill=BOTH, expand=YES)
+        self.bottomFrame.pack(side=BOTTOM, fill=BOTH, expand=YES)
         self.state = False
         self.tk.bind("<Return>", self.toggle_fullscreen)
         self.tk.bind("<Escape>", self.end_fullscreen)
@@ -274,19 +282,25 @@ class FullscreenWindow:
         # news
         self.news = News(self.bottomFrame)
         self.news.pack(side=LEFT, anchor=S, padx=100, pady=60)
+        self.tk.call("::tk::unsupported::MacWindowStyle", "style", self.tk._w, "plain", "none")
+
         # calender - removing for now
-        # self.calender = Calendar(self.bottomFrame)
-        # self.calender.pack(side = RIGHT, anchor=S, padx=100, pady=60)
+        self.calender = Calendar(self.bottomFrame)
+        self.calender.pack(side=RIGHT, anchor=S, padx=100, pady=60)
 
     def toggle_fullscreen(self, event=None):
         self.state = not self.state  # Just toggling the boolean
         self.tk.attributes("-fullscreen", self.state)
+        if self.state:
+            True
+
         return "break"
 
     def end_fullscreen(self, event=None):
         self.state = False
         self.tk.attributes("-fullscreen", False)
         return "break"
+
 
 if __name__ == '__main__':
     w = FullscreenWindow()
