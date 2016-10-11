@@ -17,13 +17,13 @@ from contextlib import contextmanager
 LOCALE_LOCK = threading.Lock()
 
 ip = '<IP>'
-ui_locale = 'fr_FR' # default is 'C'
-time_format = 24 # 12 or 24
-date_format = "%d %B %Y" # check python doc for strftime() for options
-news_country_code = 'fr' # default is 'us'
-weather_api_token = '0bf455abb8d3763d4cef8faab03273d2' # default is '<TOKEN>'
-weather_lang = 'fr' # see https://darksky.net/dev/docs/forecast for full list of language parameters values
-weather_unit = 'ca' # see https://darksky.net/dev/docs/forecast for full list of unit parameters values
+ui_locale = '' # e.g. 'fr_FR' fro French, '' as default
+time_format = 12 # 12 or 24
+date_format = "%b %d, %Y" # check python doc for strftime() for options
+news_country_code = 'us'
+weather_api_token = '<TOKEN>' # create account at https://darksky.net/dev/
+weather_lang = 'en' # see https://darksky.net/dev/docs/forecast for full list of language parameters values
+weather_unit = 'us' # see https://darksky.net/dev/docs/forecast for full list of unit parameters values
 
 @contextmanager
 def setlocale(name): #thread proof function to work with locale
