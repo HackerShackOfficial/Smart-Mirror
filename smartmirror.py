@@ -3,19 +3,39 @@
 # requests, feedparser, traceback, Pillow
 
 from Tkinter import *
+import locale
+import threading
 import time
 import requests
 import json
 import traceback
 import feedparser
+
 from PIL import Image, ImageTk
+from contextlib import contextmanager
+
+LOCALE_LOCK = threading.Lock()
 
 ip = '<IP>'
-country_code = 'us'
-weather_api_token = '<TOKEN>'
+ui_locale = '' # e.g. 'fr_FR' fro French, '' as default
+time_format = 12 # 12 or 24
+date_format = "%b %d, %Y" # check python doc for strftime() for options
+news_country_code = 'us'
+weather_api_token = '<TOKEN>' # create account at https://darksky.net/dev/
+weather_lang = 'en' # see https://darksky.net/dev/docs/forecast for full list of language parameters values
+weather_unit = 'us' # see https://darksky.net/dev/docs/forecast for full list of unit parameters values
 
+@contextmanager
+def setlocale(name): #thread proof function to work with locale
+    with LOCALE_LOCK:
+        saved = locale.setlocale(locale.LC_ALL)
+        try:
+            yield locale.setlocale(locale.LC_ALL, name)
+        finally:
+            locale.setlocale(locale.LC_ALL, saved)
 
 # maps open weather icons to
+# icon reading is not impacted by the 'lang' parameter
 icon_lookup = {
     'clear-day': "assets/Sun.png",  # clear sky day
     'wind': "assets/Wind.png",   #wind
@@ -51,23 +71,28 @@ class Clock(Frame):
         self.tick()
 
     def tick(self):
-        time2 = time.strftime('%I:%M')
-        day_of_week2 = time.strftime('%A')
-        date2 = time.strftime("%b %d, %Y")
-        # if time string has changed, update it
-        if time2 != self.time1:
-            self.time1 = time2
-            self.timeLbl.config(text=time2)
-        if day_of_week2 != self.day_of_week1:
-            self.day_of_week1 = day_of_week2
-            self.dayOWLbl.config(text=day_of_week2)
-        if date2 != self.date1:
-            self.date1 = date2
-            self.dateLbl.config(text=date2)
-        # calls itself every 200 milliseconds
-        # to update the time display as needed
-        # could use >200 ms, but display gets jerky
-        self.timeLbl.after(200, self.tick)
+        with setlocale(ui_locale):
+            if time_format == 12:
+                time2 = time.strftime('%I:%M %p') #hour in 12h format
+            else:
+                time2 = time.strftime('%H:%M') #hour in 24h format
+
+            day_of_week2 = time.strftime('%A')
+            date2 = time.strftime(date_format)
+            # if time string has changed, update it
+            if time2 != self.time1:
+                self.time1 = time2
+                self.timeLbl.config(text=time2)
+            if day_of_week2 != self.day_of_week1:
+                self.day_of_week1 = day_of_week2
+                self.dayOWLbl.config(text=day_of_week2)
+            if date2 != self.date1:
+                self.date1 = date2
+                self.dateLbl.config(text=date2)
+            # calls itself every 200 milliseconds
+            # to update the time display as needed
+            # could use >200 ms, but display gets jerky
+            self.timeLbl.after(200, self.tick)
 
 
 class Weather(Frame):
@@ -91,7 +116,7 @@ class Weather(Frame):
         self.locationLbl = Label(self, font=('Helvetica', 18), fg="white", bg="black")
         self.locationLbl.pack(side=TOP, anchor=W)
         self.get_weather()
-        
+
     def get_ip(self):
         try:
             ip_url = "http://jsonip.com/"
@@ -115,7 +140,7 @@ class Weather(Frame):
             location2 = "%s, %s" % (location_obj['city'], location_obj['region_code'])
 
             # get weather
-            weather_req_url = "https://api.darksky.net/forecast/%s/%s,%s" % (weather_api_token, lat,lon)
+            weather_req_url = "https://api.darksky.net/forecast/%s/%s,%s?lang=%s&units=%s" % (weather_api_token, lat,lon,weather_lang,weather_unit)
             r = requests.get(weather_req_url)
             weather_obj = json.loads(r.text)
 
@@ -175,7 +200,7 @@ class News(Frame):
     def __init__(self, parent, *args, **kwargs):
         Frame.__init__(self, parent, *args, **kwargs)
         self.config(bg='black')
-        self.title = 'Headlines'
+        self.title = 'News' # 'News' is more internationally generic
         self.newsLbl = Label(self, text=self.title, font=('Helvetica', 28), fg="white", bg="black")
         self.newsLbl.pack(side=TOP, anchor=W)
         self.headlinesContainer = Frame(self, bg="black")
@@ -187,11 +212,11 @@ class News(Frame):
             # remove all children
             for widget in self.headlinesContainer.winfo_children():
                 widget.destroy()
-            if country_code == None:
+            if news_country_code == None:
                 headlines_url = "https://news.google.com/news?ned=us&output=rss"
             else:
-                headlines_url = "https://news.google.com/news?ned=%s&output=rss" % country_code
-                
+                headlines_url = "https://news.google.com/news?ned=%s&output=rss" % news_country_code
+
             feed = feedparser.parse(headlines_url)
 
             for post in feed.entries[0:5]:
