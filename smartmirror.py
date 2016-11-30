@@ -200,7 +200,7 @@ class Weather(Frame):
                     self.locationLbl.config(text=location2)
         except Exception as e:
             traceback.print_exc()
-            print "Error: %s. Cannot get weather." % e
+            print("Error: {0}. Cannot get weather.".format(e))
 
         self.after(600000, self.get_weather)
 
@@ -237,7 +237,7 @@ class News(Frame):
                 headline.pack(side=TOP, anchor=W)
         except Exception as e:
             traceback.print_exc()
-            print "Error: %s. Cannot get news." % e
+            print("Error: {0}. Cannot get news.".format(e))
 
         self.after(600000, self.get_headlines)
 
