@@ -20,7 +20,7 @@ ip = '89.238.146.27'
 ui_locale = ''  # e.g. 'fr_FR' fro French, '' as default
 time_format = 24  # 12 or 24
 date_format = "%d %b, %Y"  # check python doc for strftime() for options
-news_country_code = 'gb'
+news_country_code = 'uk'
 weather_api_token = '569b5fc68ebb43065d21d439b8f9c7ff'  # create account at https://darksky.net/dev/
 weather_lang = 'en'  # see https://darksky.net/dev/docs/forecast for full list of language parameters values
 weather_unit = 'uk2'  # see https://darksky.net/dev/docs/forecast for full list of unit parameters values
@@ -125,7 +125,8 @@ class Weather(Frame):
         self.locationLbl.pack(side=TOP, anchor=W)
         self.get_weather()
 
-    def get_ip(self):
+    @staticmethod
+    def get_ip():
         try:
             ip_url = "http://jsonip.com/"
             req = requests.get(ip_url)
@@ -151,12 +152,12 @@ class Weather(Frame):
 
                 # get weather
                 weather_req_url = "https://api.darksky.net/forecast/%s/%s,%s?lang=%s&units=%s" % (
-                weather_api_token, lat, lon, weather_lang, weather_unit)
+                    weather_api_token, lat, lon, weather_lang, weather_unit)
             else:
                 location2 = ""
                 # get weather
                 weather_req_url = "https://api.darksky.net/forecast/%s/%s,%s?lang=%s&units=%s" % (
-                weather_api_token, latitude, longitude, weather_lang, weather_unit)
+                    weather_api_token, latitude, longitude, weather_lang, weather_unit)
 
             r = requests.get(weather_req_url)
             weather_obj = json.loads(r.text)
@@ -218,7 +219,7 @@ class News(Frame):
         Frame.__init__(self, parent, *args, **kwargs)
         self.config(bg='black')
         self.title = 'News'  # 'News' is more internationally generic
-        self.newsLbl = Label(self, text=self.title, font=('Helvetica', medium_text_size), fg="white", bg="black")
+        self.newsLbl = Label(self, text=self.title, font=('Helvetica', small_text_size), fg="white", bg="black")
         self.newsLbl.pack(side=TOP, anchor=W)
         self.headlinesContainer = Frame(self, bg="black")
         self.headlinesContainer.pack(side=TOP)
@@ -229,7 +230,7 @@ class News(Frame):
             # remove all children
             for widget in self.headlinesContainer.winfo_children():
                 widget.destroy()
-            if news_country_code == None:
+            if news_country_code is None:
                 headlines_url = "https://news.google.com/news?ned=us&output=rss"
             else:
                 headlines_url = "https://news.google.com/news?ned=%s&output=rss" % news_country_code
