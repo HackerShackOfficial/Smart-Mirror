@@ -262,7 +262,8 @@ class NewsHeadline(Frame):
         self.iconLbl.pack(side=LEFT, anchor=N)
 
         self.eventName = event_name
-        self.eventNameLbl = Label(self, text=self.eventName, font=('Helvetica', tiny_text_size), fg="white",
+        self.eventNameLbl = Label(self, text=" {0}".format(self.eventName), font=('Helvetica', tiny_text_size),
+                                  fg="white",
                                   bg="black")
         self.eventNameLbl.pack(side=LEFT, anchor=N)
 
