@@ -30,6 +30,7 @@ xlarge_text_size = 94
 large_text_size = 48
 medium_text_size = 28
 small_text_size = 18
+tiny_text_size = 14
 
 
 @contextmanager
@@ -261,7 +262,7 @@ class NewsHeadline(Frame):
         self.iconLbl.pack(side=LEFT, anchor=N)
 
         self.eventName = event_name
-        self.eventNameLbl = Label(self, text=self.eventName, font=('Helvetica', small_text_size), fg="white",
+        self.eventNameLbl = Label(self, text=self.eventName, font=('Helvetica', tiny_text_size), fg="white",
                                   bg="black")
         self.eventNameLbl.pack(side=LEFT, anchor=N)
 
