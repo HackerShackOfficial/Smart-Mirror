@@ -118,6 +118,8 @@ class Weather(Frame):
         self.currentlyLbl.pack(side=TOP, anchor=W)
         self.forecastLbl = Label(self, font=('Helvetica', small_text_size), fg="white", bg="black")
         self.forecastLbl.pack(side=TOP, anchor=W)
+        self.forecastLbl2 = Label(self, font=('Helvetica', small_text_size), fg="white", bg="black")
+        self.forecastLbl2.pack(side=TOP, anchor=W)
         self.locationLbl = Label(self, font=('Helvetica', small_text_size), fg="white", bg="black")
         self.locationLbl.pack(side=TOP, anchor=W)
         self.get_weather()
@@ -160,7 +162,7 @@ class Weather(Frame):
             temperature2 = "%s%s" % (str(int(weather_obj['currently']['temperature'])), degree_sign)
             currently2 = weather_obj['currently']['summary']
             forecast2 = weather_obj["hourly"]["summary"]
-
+            
             icon_id = weather_obj['currently']['icon']
             icon2 = None
 
@@ -186,7 +188,10 @@ class Weather(Frame):
                 self.currentlyLbl.config(text=currently2)
             if self.forecast != forecast2:
                 self.forecast = forecast2
+                forecast2Part2 = forecast2[forecast2.find(',')+2:]
+                forecast2 = forecast2[:forecast2.find(',')+1]
                 self.forecastLbl.config(text=forecast2)
+                self.forecastLbl2.config(text=forecast2Part2)
             if self.temperature != temperature2:
                 self.temperature = temperature2
                 self.temperatureLbl.config(text=temperature2)
@@ -255,7 +260,11 @@ class NewsHeadline(Frame):
         self.iconLbl.pack(side=LEFT, anchor=N)
 
         self.eventName = event_name
-        myText = self.eventName[0:67]#+'\n'+self.eventName[68:]
+        if len(self.eventName) > 65:
+            tmp = self.eventName[:65]
+            myText = tmp[:tmp.rfind(' ')] + ' ...'
+        else:
+            myText = self.eventName
         self.eventNameLbl = Label(self, text=myText, font=('Helvetica', small_text_size), fg="white", bg="black")
         self.eventNameLbl.pack(side=LEFT, anchor=N)
 
