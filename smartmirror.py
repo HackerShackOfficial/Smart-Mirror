@@ -14,21 +14,9 @@ import feedparser
 from PIL import Image, ImageTk
 from contextlib import contextmanager
 
-LOCALE_LOCK = threading.Lock()
+import config_smartmirror_jendit # import your own config regarding to config_smartmirror.py
 
-ui_locale = '' # e.g. 'fr_FR' fro French, '' as default
-time_format = 24 # 12 or 24
-date_format = "%b %d, %Y" # check python doc for strftime() for options
-news_country_code = 'de'
-weather_api_token = 'a20e599124c4b57451d2d2756b993658' # create account at https://darksky.net/dev/
-weather_lang = 'en' # see https://darksky.net/dev/docs/forecast for full list of language parameters values
-weather_unit = 'auto' # see https://darksky.net/dev/docs/forecast for full list of unit parameters values
-latitude = '49.45421' #None # Set this if IP location lookup does not work for you (must be a string)
-longitude = '11.07752' #None # Set this if IP location lookup does not work for you (must be a string)
-xlarge_text_size = 94
-large_text_size = 48
-medium_text_size = 28
-small_text_size = 18
+LOCALE_LOCK = threading.Lock()
 
 @contextmanager
 def setlocale(name): #thread proof function to work with locale
