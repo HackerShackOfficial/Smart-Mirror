@@ -14,7 +14,12 @@ import feedparser
 from PIL import Image, ImageTk
 from contextlib import contextmanager
 
-import config_smartmirror_jendit # import your own config regarding to config_smartmirror.py
+from config_smartmirror_jendit import * # import your own config regarding to config_smartmirror.py
+
+xlarge_text_size = 94
+large_text_size = 48
+medium_text_size = 28
+small_text_size = 18
 
 LOCALE_LOCK = threading.Lock()
 
