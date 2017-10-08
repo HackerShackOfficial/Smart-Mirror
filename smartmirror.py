@@ -23,8 +23,9 @@ small_text_size = 18
 
 LOCALE_LOCK = threading.Lock()
 
+
 @contextmanager
-def setlocale(name): #thread proof function to work with locale
+def setlocale(name):  # thread proof function to work with locale
     with LOCALE_LOCK:
         saved = locale.setlocale(locale.LC_ALL)
         try:
@@ -32,11 +33,12 @@ def setlocale(name): #thread proof function to work with locale
         finally:
             locale.setlocale(locale.LC_ALL, saved)
 
+
 # maps open weather icons to
 # icon reading is not impacted by the 'lang' parameter
 icon_lookup = {
     'clear-day': "assets/Sun.png",  # clear sky day
-    'wind': "assets/Wind.png",   #wind
+    'wind': "assets/Wind.png",   # wind
     'cloudy': "assets/Cloud.png",  # cloudy day
     'partly-cloudy-day': "assets/PartlySunny.png",  # partly cloudy day
     'rain': "assets/Rain.png",  # rain day
@@ -71,9 +73,9 @@ class Clock(Frame):
     def tick(self):
         with setlocale(ui_locale):
             if time_format == 12:
-                time2 = time.strftime('%I:%M %p') #hour in 12h format
+                time2 = time.strftime('%I:%M %p')  # hour in 12h format
             else:
-                time2 = time.strftime('%H:%M') #hour in 24h format
+                time2 = time.strftime('%H:%M')  # hour in 24h format
 
             day_of_week2 = time.strftime('%A')
             date2 = time.strftime(date_format)
@@ -142,7 +144,7 @@ class Weather(Frame):
                 location2 = "%s, %s" % (location_obj['city'], location_obj['region_code'])
 
                 # get weather
-                weather_req_url = "https://api.darksky.net/forecast/%s/%s,%s?lang=%s&units=%s" % (weather_api_token, lat,lon,weather_lang,weather_unit)
+                weather_req_url = "https://api.darksky.net/forecast/%s/%s,%s?lang=%s&units=%s" % (weather_api_token, lat, lon, weather_lang, weather_unit)
             else:
                 location2 = ""
                 # get weather
@@ -151,7 +153,7 @@ class Weather(Frame):
             r = requests.get(weather_req_url)
             weather_obj = json.loads(r.text)
 
-            degree_sign= u'\N{DEGREE SIGN}'
+            degree_sign = u'\N{DEGREE SIGN}'
             temperature2 = "%s%s" % (str(int(weather_obj['currently']['temperature'])), degree_sign)
             currently2 = weather_obj['currently']['summary']
             forecast2 = weather_obj["hourly"]["summary"]
@@ -181,10 +183,10 @@ class Weather(Frame):
                 self.currentlyLbl.config(text=currently2)
             if self.forecast != forecast2:
                 self.forecast = forecast2
-                forecast2Part2 = forecast2[forecast2.find(',')+2:]
+                forecast2part2 = forecast2[forecast2.find(',')+2:]
                 forecast2 = forecast2[:forecast2.find(',')+1]
                 self.forecastLbl.config(text=forecast2)
-                self.forecastLbl2.config(text=forecast2Part2)
+                self.forecastLbl2.config(text=forecast2part2)
             if self.temperature != temperature2:
                 self.temperature = temperature2
                 self.temperatureLbl.config(text=temperature2)
@@ -210,7 +212,7 @@ class News(Frame):
     def __init__(self, parent, *args, **kwargs):
         Frame.__init__(self, parent, *args, **kwargs)
         self.config(bg='black')
-        self.title = 'News' # 'News' is more internationally generic
+        self.title = 'News'  # 'News' is more internationally generic
         self.newsLbl = Label(self, text=self.title, font=('Helvetica', medium_text_size), fg="white", bg="black")
         self.newsLbl.pack(side=TOP, anchor=W)
         self.headlinesContainer = Frame(self, bg="black")
@@ -222,7 +224,7 @@ class News(Frame):
             # remove all children
             for widget in self.headlinesContainer.winfo_children():
                 widget.destroy()
-            if news_country_code == None:
+            if not news_country_code:
                 headlines_url = "https://news.google.com/news?ned=us&output=rss"
             else:
                 headlines_url = "https://news.google.com/news?ned=%s&output=rss" % news_country_code
@@ -255,10 +257,10 @@ class NewsHeadline(Frame):
         self.eventName = event_name
         if len(self.eventName) > 65:
             tmp = self.eventName[:65]
-            myText = tmp[:tmp.rfind(' ')] + ' ...'
+            my_text = tmp[:tmp.rfind(' ')] + ' ...'
         else:
-            myText = self.eventName
-        self.eventNameLbl = Label(self, text=myText, font=('Helvetica', small_text_size), fg="white", bg="black")
+            my_text = self.eventName
+        self.eventNameLbl = Label(self, text=my_text, font=('Helvetica', small_text_size), fg="white", bg="black")
         self.eventNameLbl.pack(side=LEFT, anchor=N)
 
 
@@ -273,7 +275,7 @@ class Calendar(Frame):
         self.get_events()
 
     def get_events(self):
-        #TODO: implement this method
+        # TODO: implement this method
         # reference https://developers.google.com/google-apps/calendar/quickstart/python
 
         # remove all children
@@ -298,10 +300,10 @@ class FullscreenWindow:
     def __init__(self):
         self.tk = Tk()
         self.tk.configure(background='black')
-        self.topFrame = Frame(self.tk, background = 'black')
-        self.bottomFrame = Frame(self.tk, background = 'black')
-        self.topFrame.pack(side = TOP, fill=BOTH, expand = YES)
-        self.bottomFrame.pack(side = BOTTOM, fill=BOTH, expand = YES)
+        self.topFrame = Frame(self.tk, background='black')
+        self.bottomFrame = Frame(self.tk, background='black')
+        self.topFrame.pack(side=TOP, fill=BOTH, expand=YES)
+        self.bottomFrame.pack(side=BOTTOM, fill=BOTH, expand=YES)
         self.state = False
         self.tk.bind("<Return>", self.toggle_fullscreen)
         self.tk.bind("<Escape>", self.end_fullscreen)
@@ -327,6 +329,7 @@ class FullscreenWindow:
         self.state = False
         self.tk.attributes("-fullscreen", False)
         return "break"
+
 
 if __name__ == '__main__':
     w = FullscreenWindow()
