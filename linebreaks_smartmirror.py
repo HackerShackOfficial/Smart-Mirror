@@ -111,8 +111,10 @@ class Weather(Frame):
         self.iconLbl.pack(side=LEFT, anchor=N, padx=20)
         self.currentlyLbl = Label(self, font=('Helvetica', medium_text_size), fg="white", bg="black")
         self.currentlyLbl.pack(side=TOP, anchor=W)
-        self.forecastTxt = Text(self, font=('Helvetica', small_text_size), fg="white", bg="black", borderwidth=0, highlightthickness=0, wrap=WORD, height=3)
-        self.forecastTxt.pack(side=TOP, anchor=W)
+        self.forecastLbl = Label(self, font=('Helvetica', small_text_size), fg="white", bg="black")
+        self.forecastLbl.pack(side=TOP, anchor=W)
+        self.forecastLbl2 = Label(self, font=('Helvetica', small_text_size), fg="white", bg="black")
+        self.forecastLbl2.pack(side=TOP, anchor=W)
         self.locationLbl = Label(self, font=('Helvetica', small_text_size), fg="white", bg="black")
         self.locationLbl.pack(side=TOP, anchor=W)
         self.get_weather()
@@ -181,7 +183,10 @@ class Weather(Frame):
                 self.currentlyLbl.config(text=currently2)
             if self.forecast != forecast2:
                 self.forecast = forecast2
-                self.forecastTxt.insert(INSERT, forecast2)
+                forecast2part2 = forecast2[forecast2.find(',')+2:]
+                forecast2 = forecast2[:forecast2.find(',')+1]
+                self.forecastLbl.config(text=forecast2)
+                self.forecastLbl2.config(text=forecast2part2)
             if self.temperature != temperature2:
                 self.temperature = temperature2
                 self.temperatureLbl.config(text=temperature2)
@@ -249,9 +254,15 @@ class NewsHeadline(Frame):
         self.iconLbl.image = photo
         self.iconLbl.pack(side=LEFT, anchor=N)
 
-        self.eventNameTxt = Text(self, font=('Helvetica', small_text_size), wrap=WORD, height=1, fg="white", bg="black", borderwidth=0, highlightthickness=0)
-        self.eventNameTxt.pack(side=LEFT, anchor=N)
-        self.eventNameTxt.insert(INSERT, event_name)
+        self.eventName = event_name
+        if len(self.eventName) > 65:
+            tmp = self.eventName[:65]
+            my_text = tmp[:tmp.rfind(' ')] + ' ...'
+        else:
+            my_text = self.eventName
+        self.eventNameLbl = Label(self, text=my_text, font=('Helvetica', small_text_size), fg="white", bg="black")
+        self.eventNameLbl.pack(side=LEFT, anchor=N)
+
 
 class Calendar(Frame):
     def __init__(self, parent, *args, **kwargs):
