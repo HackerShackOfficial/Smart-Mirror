@@ -181,6 +181,7 @@ class Weather(Frame):
                 self.currentlyLbl.config(text=currently2)
             if self.forecast != forecast2:
                 self.forecast = forecast2
+                self.forecastTxt.delete(1.0, END)
                 self.forecastTxt.insert(INSERT, forecast2)
             if self.temperature != temperature2:
                 self.temperature = temperature2
@@ -251,6 +252,7 @@ class NewsHeadline(Frame):
 
         self.eventNameTxt = Text(self, font=('Helvetica', small_text_size), wrap=WORD, height=1, fg="white", bg="black", borderwidth=0, highlightthickness=0)
         self.eventNameTxt.pack(side=LEFT, anchor=N)
+        self.eventNameTxt.delete(1.0, END)
         self.eventNameTxt.insert(INSERT, event_name)
 
 class Calendar(Frame):
