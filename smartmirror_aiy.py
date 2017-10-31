@@ -1,3 +1,4 @@
+#!python2
 # smartmirror.py
 # requirements
 # requests, feedparser, traceback, Pillow
@@ -111,10 +112,8 @@ class Weather(Frame):
         self.iconLbl.pack(side=LEFT, anchor=N, padx=20)
         self.currentlyLbl = Label(self, font=('Helvetica', medium_text_size), fg="white", bg="black")
         self.currentlyLbl.pack(side=TOP, anchor=W)
-        self.forecastLbl = Label(self, font=('Helvetica', small_text_size), fg="white", bg="black")
-        self.forecastLbl.pack(side=TOP, anchor=W)
-        self.forecastLbl2 = Label(self, font=('Helvetica', small_text_size), fg="white", bg="black")
-        self.forecastLbl2.pack(side=TOP, anchor=W)
+        self.forecastTxt = Text(self, font=('Helvetica', small_text_size), fg="white", bg="black", borderwidth=0, highlightthickness=0, wrap=WORD, height=3)
+        self.forecastTxt.pack(side=TOP, anchor=W)
         self.locationLbl = Label(self, font=('Helvetica', small_text_size), fg="white", bg="black")
         self.locationLbl.pack(side=TOP, anchor=W)
         self.get_weather()
@@ -183,10 +182,8 @@ class Weather(Frame):
                 self.currentlyLbl.config(text=currently2)
             if self.forecast != forecast2:
                 self.forecast = forecast2
-                forecast2part2 = forecast2[forecast2.find(',')+2:]
-                forecast2 = forecast2[:forecast2.find(',')+1]
-                self.forecastLbl.config(text=forecast2)
-                self.forecastLbl2.config(text=forecast2part2)
+                self.forecastTxt.delete(1.0, END)
+                self.forecastTxt.insert(INSERT, forecast2)
             if self.temperature != temperature2:
                 self.temperature = temperature2
                 self.temperatureLbl.config(text=temperature2)
@@ -254,15 +251,10 @@ class NewsHeadline(Frame):
         self.iconLbl.image = photo
         self.iconLbl.pack(side=LEFT, anchor=N)
 
-        self.eventName = event_name
-        if len(self.eventName) > 65:
-            tmp = self.eventName[:65]
-            my_text = tmp[:tmp.rfind(' ')] + ' ...'
-        else:
-            my_text = self.eventName
-        self.eventNameLbl = Label(self, text=my_text, font=('Helvetica', small_text_size), fg="white", bg="black")
-        self.eventNameLbl.pack(side=LEFT, anchor=N)
-
+        self.eventNameTxt = Text(self, font=('Helvetica', small_text_size), wrap=WORD, height=1, fg="white", bg="black", borderwidth=0, highlightthickness=0)
+        self.eventNameTxt.pack(side=LEFT, anchor=N)
+        self.eventNameTxt.delete(1.0, END)
+        self.eventNameTxt.insert(INSERT, event_name)
 
 class Calendar(Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -300,24 +292,33 @@ class FullscreenWindow:
     def __init__(self):
         self.tk = Tk()
         self.tk.configure(background='black')
-        self.topFrame = Frame(self.tk, background='black')
-        self.bottomFrame = Frame(self.tk, background='black')
+        self.topFrame = Frame(self.tk, background='white')
         self.topFrame.pack(side=TOP, fill=BOTH, expand=YES)
+        self.bottomFrame = Frame(self.tk, background='yellow')
         self.bottomFrame.pack(side=BOTTOM, fill=BOTH, expand=YES)
+        self.baseinfoFrame = Frame(self.topFrame, background='orange')
+        self.baseinfoFrame.pack(side=TOP, fill=BOTH, expand=YES)
+        self.aiyFrame = Frame(self.topFrame, background='blue')
+        self.aiyFrame.pack(side=BOTTOM, fill=BOTH, expand=YES)
+        self.newsFrame = Frame(self.bottomFrame, background='green')
+        self.newsFrame.pack(side=BOTTOM, fill=BOTH, expand=YES)
         self.state = False
         self.tk.bind("<Return>", self.toggle_fullscreen)
         self.tk.bind("<Escape>", self.end_fullscreen)
+
+        # AIY
+        Label(self.aiyFrame, text='Here goes the AIY feedback.', bg='black', fg='white').pack()
         # clock
-        self.clock = Clock(self.topFrame)
+        self.clock = Clock(self.baseinfoFrame)
         self.clock.pack(side=RIGHT, anchor=N, padx=100, pady=60)
         # weather
-        self.weather = Weather(self.topFrame)
+        self.weather = Weather(self.baseinfoFrame)
         self.weather.pack(side=LEFT, anchor=N, padx=100, pady=60)
         # news
-        self.news = News(self.bottomFrame)
+        self.news = News(self.newsFrame)
         self.news.pack(side=LEFT, anchor=S, padx=100, pady=60)
         # calender - removing for now
-        # self.calender = Calendar(self.bottomFrame)
+        # self.calender = Calendar(self.newsFrame)
         # self.calender.pack(side = RIGHT, anchor=S, padx=100, pady=60)
 
     def toggle_fullscreen(self, event=None):
@@ -333,4 +334,5 @@ class FullscreenWindow:
 
 if __name__ == '__main__':
     w = FullscreenWindow()
+    w.toggle_fullscreen()
     w.tk.mainloop()
