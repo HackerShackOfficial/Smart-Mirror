@@ -323,8 +323,6 @@ class MyAssistant(Frame):
         self.start()
 
     def aiyStatusUpdate(self):
-        if "I am listening" in self._updateStatus:
-            self.stateTxt.delete(1.0, END)
         self.stateTxt.insert(INSERT, self._updateStatus)
         self._updateStatus = ''
         self.after(200, self.aiyStatusUpdate)
@@ -361,13 +359,6 @@ class MyAssistant(Frame):
             self._can_start_conversation = False
             status_ui.status('listening')
             self._updateStatus = 'I am listening\n'
-
-        elif event.type == EventType.ON_RECOGNIZING_SPEECH_FINISHED:
-            self._updateStatus = event._args
-           # self._updateStatus = 'You sayed: ' + event._args + '\n'
-
-        elif event.type == EventType.ON_RESPONDING_STARTED:
-            self._updateStatus = 'Here is my anser\n'
 
         elif event.type == EventType.ON_END_OF_UTTERANCE:
             status_ui.status('thinking')
