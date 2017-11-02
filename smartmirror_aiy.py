@@ -1,3 +1,4 @@
+#! python3
 # smartmirror.py
 # requirements
 # requests, feedparser, traceback, Pillow
@@ -367,7 +368,7 @@ class MyAssistant(Frame):
            # self._updateStatus = 'You sayed: ' + event._args + '\n'
 
         elif event.type == EventType.ON_RESPONDING_STARTED:
-            self._updateStatus = 'Here is my anser\n'
+            self._updateStatus = 'Here is my answer\n'
 
         elif event.type == EventType.ON_END_OF_UTTERANCE:
             status_ui.status('thinking')
