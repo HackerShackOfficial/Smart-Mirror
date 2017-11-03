@@ -27,6 +27,8 @@ import aiy.voicehat
 from google.assistant.library import Assistant
 from google.assistant.library.event import EventType
 
+from AnimatedGif import *
+
 logging.basicConfig(
     level=logging.INFO,
     format="[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
@@ -213,7 +215,7 @@ class Weather(Frame):
                     self.locationLbl.config(text=location2)
         except Exception as e:
             traceback.print_exc()
-            # print "Error: %s. Cannot get weather." % e
+            print("Error: {}. Cannot get weather.".format(e))
 
         self.after(600000, self.get_weather)
 
@@ -250,7 +252,7 @@ class News(Frame):
                 headline.pack(side=TOP, anchor=W)
         except Exception as e:
             traceback.print_exc()
-            # print "Error: %s. Cannot get news." % e
+            print("Error: {}. Cannot get news.".format(e))
 
         self.after(600000, self.get_headlines)
 
@@ -313,11 +315,15 @@ class MyAssistant(Frame):
     """
     def __init__(self, parent, *args, **kwargs):
         Frame.__init__(self, parent, bg='black')
-        self.stateTxt = Text(self, font=('Helvetica', small_text_size),fg='white', bg='black', borderwidth=0, highlightthickness=0, wrap=WORD, height=5)
-        self.stateTxt.pack(side=TOP, anchor=W)
+        self.lblWithFace = AnimatedGif(parent, 'assets/face.gif', 0.04)
+        self.lblWithFace.pack(side=TOP, anchor=CENTER)
+        self.lblWithFace.start()
+        self.stateTxt = Text(self, font=('Helvetica', small_text_size),fg='white', bg='black',borderwidth=0, highlightthickness=0, wrap=WORD, height=5)
+        self.stateTxt.pack(side=BOTTOM, anchor=CENTER)
+        self.stateTxt.tag_config('centered', justify=CENTER)
         self._updateStatus = ''
-        self.stateTxt.insert(INSERT, self._updateStatus)
-        self.stateTxt.pack(side=TOP, anchor=E)
+        self.stateTxt.insert(INSERT, self._updateStatus, 'centered')
+        self.stateTxt.pack(side=BOTTOM, anchor=CENTER)
         self._task = threading.Thread(target=self._run_task)
         self._can_start_conversation = False
         self._assistant = None
@@ -326,7 +332,7 @@ class MyAssistant(Frame):
     def aiyStatusUpdate(self):
         if "I am listening" in self._updateStatus:
             self.stateTxt.delete(1.0, END)
-        self.stateTxt.insert(INSERT, self._updateStatus)
+        self.stateTxt.insert(INSERT, self._updateStatus, 'centered')
         self._updateStatus = ''
         self.after(200, self.aiyStatusUpdate)
 
@@ -364,8 +370,7 @@ class MyAssistant(Frame):
             self._updateStatus = 'I am listening\n'
 
         elif event.type == EventType.ON_RECOGNIZING_SPEECH_FINISHED:
-            self._updateStatus = event._args
-           # self._updateStatus = 'You sayed: ' + event._args + '\n'
+            self._updateStatus = 'You said: "' + event._args.get('text') + '"\n'
 
         elif event.type == EventType.ON_RESPONDING_STARTED:
             self._updateStatus = 'Here is my answer\n'
@@ -395,15 +400,15 @@ class FullscreenWindow:
     def __init__(self):
         self.tk = Tk()
         self.tk.configure(background='black')
-        self.topFrame = Frame(self.tk, background='white')
+        self.topFrame = Frame(self.tk, background='black')
         self.topFrame.pack(side=TOP, fill=BOTH, expand=YES)
-        self.bottomFrame = Frame(self.tk, background='yellow')
+        self.bottomFrame = Frame(self.tk, background='black')
         self.bottomFrame.pack(side=BOTTOM, fill=BOTH, expand=YES)
-        self.baseinfoFrame = Frame(self.topFrame, background='orange')
+        self.baseinfoFrame = Frame(self.topFrame, background='black')
         self.baseinfoFrame.pack(side=TOP, fill=BOTH, expand=YES)
-        self.aiyFrame = Frame(self.topFrame, background='blue')
+        self.aiyFrame = Frame(self.topFrame, background='black')
         self.aiyFrame.pack(side=BOTTOM, fill=BOTH, expand=YES)
-        self.newsFrame = Frame(self.bottomFrame, background='green')
+        self.newsFrame = Frame(self.bottomFrame, background='black')
         self.newsFrame.pack(side=BOTTOM, fill=BOTH, expand=YES)
         self.state = False
         self.tk.bind("<Return>", self.toggle_fullscreen)
