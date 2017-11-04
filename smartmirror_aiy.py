@@ -27,8 +27,6 @@ import aiy.voicehat
 from google.assistant.library import Assistant
 from google.assistant.library.event import EventType
 
-from AnimatedGif import *
-
 logging.basicConfig(
     level=logging.INFO,
     format="[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
@@ -315,9 +313,10 @@ class MyAssistant(Frame):
     """
     def __init__(self, parent, *args, **kwargs):
         Frame.__init__(self, parent, bg='black')
-        self.lblWithFace = AnimatedGif(parent, 'assets/face.gif', 0.04)
-        self.lblWithFace.pack(side=TOP, anchor=CENTER)
-        self.lblWithFace.start()
+        self.faceReal = PhotoImage(file='assets/face.gif')
+        self.faceBlack = PhotoImage(file='assets/face_black.gif')
+        self.faceLbl = Label(self, image=self.faceReal, bg='black')
+        self.faceLbl.pack(side=TOP, anchor=CENTER)
         self.stateTxt = Text(self, font=('Helvetica', small_text_size),fg='white', bg='black',borderwidth=0, highlightthickness=0, wrap=WORD, height=5)
         self.stateTxt.pack(side=BOTTOM, anchor=CENTER)
         self.stateTxt.tag_config('centered', justify=CENTER)
@@ -327,15 +326,28 @@ class MyAssistant(Frame):
         self._task = threading.Thread(target=self._run_task)
         self._can_start_conversation = False
         self._assistant = None
+        self.lastStatus = 'nothing yet'
+        self.lastStatusTime = time.time()
         self.start()
 
     def aiyStatusUpdate(self):
-        if "I am listening" in self._updateStatus:
-            self.stateTxt.delete(1.0, END)
-        self.stateTxt.insert(INSERT, self._updateStatus, 'centered')
-        self._updateStatus = ''
-        self.after(200, self.aiyStatusUpdate)
+        #for i in range(100):
+        #    self.faceReal = PhotoImage(file='assets/face.gif', format='gif -index %i' %(i))
+        if self.lastStatus != self._updateStatus:
+            self.lastStatusTime = time.time()
+            self.lastStatus = self._updateStatus
 
+        if time.time() - self.lastStatusTime < 15:
+            if "I am listening" in self._updateStatus:
+                self.stateTxt.delete(1.0, END)
+            self.stateTxt.insert(INSERT, self._updateStatus, 'centered')
+            self._updateStatus = ''
+            self.faceLbl.configure(image = self.faceReal)
+        else:
+            self.stateTxt.delete(1.0, END)
+            self.faceLbl.configure(image = self.faceBlack)
+        
+        self.after(200, self.aiyStatusUpdate)
 
     def start(self):
         """Starts the assistant.
