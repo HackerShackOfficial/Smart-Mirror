@@ -1,7 +1,0 @@
-
-Change the current RSS News feed as it will stop working at December 1st.
-
-New Feed:
-https://news.google.com/news/rss/settings/sections?ned=de&hl=de&gl=DE
-
-Adjust the news extraction as needed.

@@ -239,9 +239,9 @@ class News(Frame):
             for widget in self.headlinesContainer.winfo_children():
                 widget.destroy()
             if not news_country_code:
-                headlines_url = "https://news.google.com/news?ned=us&output=rss"
+                headlines_url = "https://news.google.com/news/rss/?gl=us&ned=us&hl=us"
             else:
-                headlines_url = "https://news.google.com/news?ned=%s&output=rss" % news_country_code
+                headlines_url="https://news.google.com/news/rss/?gl={}&ned={}&hl={}".format(news_country_code, news_country_code, news_country_code)
 
             feed = feedparser.parse(headlines_url)
 
