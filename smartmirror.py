@@ -10,17 +10,25 @@ import requests
 import json
 import traceback
 import feedparser
+import datetime
+import pickle
+import os.path
 
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
 from PIL import Image, ImageTk
 from contextlib import contextmanager
 
 LOCALE_LOCK = threading.Lock()
 
+gcal_api = ['https://www.googleapis.com/auth/calendar.readonly'] # Needed for calendar
 ui_locale = '' # e.g. 'fr_FR' fro French, '' as default
 time_format = 12 # 12 or 24
 date_format = "%b %d, %Y" # check python doc for strftime() for options
 news_country_code = 'us'
-weather_api_token = '<TOKEN>' # create account at https://darksky.net/dev/
+ipstack_token = 'd8888b6253421fc8ac77c1e7388eb74e'
+weather_api_token = '2e851780ae49e871e13b90ce57a04d66' # create account at https://darksky.net/dev/
 weather_lang = 'en' # see https://darksky.net/dev/docs/forecast for full list of language parameters values
 weather_unit = 'us' # see https://darksky.net/dev/docs/forecast for full list of unit parameters values
 latitude = None # Set this if IP location lookup does not work for you (must be a string)
@@ -57,6 +65,12 @@ icon_lookup = {
     'hail': "assests/Hail.png"  # hail
 }
 
+class Hello(Frame):
+    def __init__(self, parent, *args, **kwargs):
+        Frame.__init__(self, parent, bg='black')
+        self.greeting = 'Hello, Anuja'
+        self.greetingLbl = Label(self, text=self.greeting, font=('Helvetica', large_text_size), fg="white", bg="black")
+        self.greetingLbl.pack(side=TOP, anchor=CENTER)
 
 class Clock(Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -119,7 +133,7 @@ class Weather(Frame):
         self.forecastLbl = Label(self, font=('Helvetica', small_text_size), fg="white", bg="black")
         self.forecastLbl.pack(side=TOP, anchor=W)
         self.locationLbl = Label(self, font=('Helvetica', small_text_size), fg="white", bg="black")
-        self.locationLbl.pack(side=TOP, anchor=W)
+        self.locationLbl.pack(side=TOP, anchor=E)
         self.get_weather()
 
     def get_ip(self):
@@ -134,10 +148,9 @@ class Weather(Frame):
 
     def get_weather(self):
         try:
-
             if latitude is None and longitude is None:
                 # get location
-                location_req_url = "http://freegeoip.net/json/%s" % self.get_ip()
+                location_req_url = "http://api.ipstack.com/%s?access_key=%s" % (self.get_ip(), ipstack_token)
                 r = requests.get(location_req_url)
                 location_obj = json.loads(r.text)
 
@@ -262,25 +275,59 @@ class NewsHeadline(Frame):
 class Calendar(Frame):
     def __init__(self, parent, *args, **kwargs):
         Frame.__init__(self, parent, bg='black')
-        self.title = 'Calendar Events'
+        self.title = 'Upcoming Events'
         self.calendarLbl = Label(self, text=self.title, font=('Helvetica', medium_text_size), fg="white", bg="black")
         self.calendarLbl.pack(side=TOP, anchor=E)
         self.calendarEventContainer = Frame(self, bg='black')
-        self.calendarEventContainer.pack(side=TOP, anchor=E)
+        self.calendarEventContainer.pack(side=LEFT, anchor=N)
         self.get_events()
 
     def get_events(self):
-        #TODO: implement this method
         # reference https://developers.google.com/google-apps/calendar/quickstart/python
 
         # remove all children
         for widget in self.calendarEventContainer.winfo_children():
             widget.destroy()
 
-        calendar_event = CalendarEvent(self.calendarEventContainer)
-        calendar_event.pack(side=TOP, anchor=E)
-        pass
+        creds = None
+        # The file token.pickle stores the user's access and refresh tokens, and is
+        # created automatically when the authorization flow completes for the first
+        # time.
+        if os.path.exists('token.pickle'):
+            with open('token.pickle', 'rb') as token:
+                creds = pickle.load(token)
+        # If there are no (valid) credentials available, let the user log in.
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    'credentials.json', gcal_api)
+                creds = flow.run_local_server(port=0)
+            # Save the credentials for the next run
+            with open('token.pickle', 'wb') as token:
+                pickle.dump(creds, token)
 
+        service = build('calendar', 'v3', credentials=creds)
+
+        # Call the Calendar API
+        now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+        events_result = service.events().list(calendarId='primary', timeMin=now,
+                                            maxResults=5, singleEvents=True,
+                                            orderBy='startTime').execute()
+        events = events_result.get('items', [])
+
+        if events:
+            for event in events:
+                event_time = event['start'].get('dateTime', event['start'].get('date'))
+                event_time = event_time[:event_time.rindex('-')]
+                event_time = datetime.datetime.strptime(event_time, '%Y-%m-%dT%H:%M:%S')
+                event_time = event_time.strftime("%a %b %d %I:%M %p")
+                event_name = event['summary'] + ": " + event_time
+                calendar_event = CalendarEvent(self.calendarEventContainer, event_name=event_name)
+                calendar_event.pack(side=TOP, anchor=E)
+
+        self.after(600000, self.get_events)
 
 class CalendarEvent(Frame):
     def __init__(self, parent, event_name="Event 1"):
@@ -288,7 +335,6 @@ class CalendarEvent(Frame):
         self.eventName = event_name
         self.eventNameLbl = Label(self, text=self.eventName, font=('Helvetica', small_text_size), fg="white", bg="black")
         self.eventNameLbl.pack(side=TOP, anchor=E)
-
 
 class FullscreenWindow:
 
@@ -302,18 +348,23 @@ class FullscreenWindow:
         self.state = False
         self.tk.bind("<Return>", self.toggle_fullscreen)
         self.tk.bind("<Escape>", self.end_fullscreen)
-        # clock
-        self.clock = Clock(self.topFrame)
-        self.clock.pack(side=RIGHT, anchor=N, padx=100, pady=60)
         # weather
         self.weather = Weather(self.topFrame)
-        self.weather.pack(side=LEFT, anchor=N, padx=100, pady=60)
+        self.weather.pack(side=LEFT, anchor=NW, padx=100, pady=60)
+        # clock
+        self.clock = Clock(self.topFrame)
+        self.clock.pack(side=RIGHT, anchor=NE, padx=100, pady=60)
+        # greeting
+        self.hello = Hello(self.topFrame)
+        self.hello.pack(side=BOTTOM, anchor=CENTER, padx=100, pady=60)
+        # calender
+        self.calender = Calendar(self.bottomFrame)
+        self.calender.pack(side=LEFT, anchor=NW, padx=100, pady=60)
+        
+
         # news
-        self.news = News(self.bottomFrame)
-        self.news.pack(side=LEFT, anchor=S, padx=100, pady=60)
-        # calender - removing for now
-        # self.calender = Calendar(self.bottomFrame)
-        # self.calender.pack(side = RIGHT, anchor=S, padx=100, pady=60)
+        #self.news = News(self.bottomFrame)
+        #self.news.pack(side=LEFT, anchor=SW, padx=100, pady=60)
 
     def toggle_fullscreen(self, event=None):
         self.state = not self.state  # Just toggling the boolean
