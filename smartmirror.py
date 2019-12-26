@@ -257,6 +257,49 @@ class NewsHeadline(Frame):
         self.eventName = event_name
         self.eventNameLbl = Label(self, text=self.eventName, font=('Helvetica', small_text_size), fg="white", bg="black")
         self.eventNameLbl.pack(side=LEFT, anchor=N)
+        
+class Markets(Frame):
+    def __init__(self,parent, *args, **kwargs):
+        Frame.__init(self, parent, *args, **kwargs)
+        self.config(bg='black')
+        self.title = 'Markets'
+        self.mktsLbl = Label(self, text=self.title, font = ('Helvetica', medium_text_size), fg = 'white', bg='black')
+        self.mktsLbl.pack(side=TOP, anchor=W)
+        self.stockContainer = Frame(self, bg='black')
+        self.stockContainer.pack(side=TOP)
+        self.get_stocks()
+        
+       def get_stocks(self):
+        try:
+            headlines_url = 'https://seekingalpha.com/feed.xml'
+            
+            feed = feedparser.parse(headlines_url)
+            
+            for post in feed.entries[0:5]:
+                headline = Marketsheadline(self.stockContainer, post.title)
+                headline.pack(side=TOP, anchor=W)
+        except Exception as e:
+            traceback.print_exc()
+            print("Error: %s. Cannot get news" % e)
+        self.after(300000, self.get_stocks)
+ 
+class Marketsheadline(Frame):
+    def __init__(self, parent, event_name= ''):
+        Frame.__init__(self, parent, bg='black')
+        image = Image.open("assets/Newspaper.png")
+        image = image.resize((25,25), Image.ANTIALIAS)
+        image = image.convert("RGB")
+        photo = ImageTk.PhotoImage(image)
+        
+        self.iconLbl = Label(self, bg='black', image=photo)
+        self.iconLbl.image = photo
+        self.iconLbl.pack(side=LEFT, anchor=N)
+        
+        self.eventName = event_name
+        self.eventNameLbl = Label(self, text=self.eventName, font = ("Helvetica", small_text_size), fg = 'white', bg = 'black')
+        self.eventNameLbl.pack(side=LEFT, anchor=N)
+        
+        
 
 
 class Calendar(Frame):
@@ -297,8 +340,10 @@ class FullscreenWindow:
         self.tk.configure(background='black')
         self.topFrame = Frame(self.tk, background = 'black')
         self.bottomFrame = Frame(self.tk, background = 'black')
+        self.centerFrame = Frame(self.tk, background = 'black')
         self.topFrame.pack(side = TOP, fill=BOTH, expand = YES)
         self.bottomFrame.pack(side = BOTTOM, fill=BOTH, expand = YES)
+        self.centerFrame.pack(side = LEFT, fill = BOTH, expand = YES)
         self.state = False
         self.tk.bind("<Return>", self.toggle_fullscreen)
         self.tk.bind("<Escape>", self.end_fullscreen)
@@ -311,6 +356,9 @@ class FullscreenWindow:
         # news
         self.news = News(self.bottomFrame)
         self.news.pack(side=LEFT, anchor=S, padx=100, pady=60)
+        # markets
+        self.markets = Markets(self.centerFrame)
+        self.markets.pack(side=LEFT, anchor=S, padx=100, pady=60)
         # calender - removing for now
         # self.calender = Calendar(self.bottomFrame)
         # self.calender.pack(side = RIGHT, anchor=S, padx=100, pady=60)
