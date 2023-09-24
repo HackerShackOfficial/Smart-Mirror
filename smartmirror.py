@@ -20,11 +20,7 @@ ui_locale = '' # e.g. 'fr_FR' fro French, '' as default
 time_format = 12 # 12 or 24
 date_format = "%b %d, %Y" # check python doc for strftime() for options
 news_country_code = 'us'
-weather_api_token = '<TOKEN>' # create account at https://darksky.net/dev/
-weather_lang = 'en' # see https://darksky.net/dev/docs/forecast for full list of language parameters values
-weather_unit = 'us' # see https://darksky.net/dev/docs/forecast for full list of unit parameters values
-latitude = None # Set this if IP location lookup does not work for you (must be a string)
-longitude = None # Set this if IP location lookup does not work for you (must be a string)
+weather_url = "https://www.wunderground.com/weather/us/mn/lakeville" 
 xlarge_text_size = 94
 large_text_size = 48
 medium_text_size = 28
@@ -103,12 +99,37 @@ icon_lookup = {
     47: "assets/Storm.png"
 }
 
+def getWeather():
+    fp = urllib.request.urlopen(weather_url)
+    mybytes = fp.read()
+    mystr = mybytes.decode("utf8")
+    fp.close()
 
+    doc = BeautifulSoup(mystr, "html.parser")
 
+    attemp = doc.find('div', class_= "condition-icon small-6 medium-12 columns")
+    current = attemp.find('p').string
 
+    attemp = doc.find('span', class_= "wu-value wu-value-to")
+    temp = attemp.string
 
+    forecast = (doc.find('p', class_= "weather-quickie")).text
 
+    location = doc.find('title')
+    location = location.string
+    location = (location.split(","))[0]
 
+    icon = doc.find("div", class_="condition-icon small-6 medium-12 columns")
+    x = str(icon).index(".svg")
+    y = str(icon)[x-2:x]
+    j = []
+    for item in y:
+        if item.isnumeric() == False:
+            continue
+        j.append(item)
+    icon = int("".join(j))
+            
+    return (temp,current,forecast,location,icon)
 
 
 
@@ -189,33 +210,9 @@ class Weather(Frame):
     def get_weather(self):
         try:
 
-            if latitude is None and longitude is None:
-                # get location
-                location_req_url = "http://freegeoip.net/json/%s" % self.get_ip()
-                r = requests.get(location_req_url)
-                location_obj = json.loads(r.text)
+           temp,currently2,forecast2,location2,icon_id = getWeather()
 
-                lat = location_obj['latitude']
-                lon = location_obj['longitude']
-
-                location2 = "%s, %s" % (location_obj['city'], location_obj['region_code'])
-
-                # get weather
-                weather_req_url = "https://api.darksky.net/forecast/%s/%s,%s?lang=%s&units=%s" % (weather_api_token, lat,lon,weather_lang,weather_unit)
-            else:
-                location2 = ""
-                # get weather
-                weather_req_url = "https://api.darksky.net/forecast/%s/%s,%s?lang=%s&units=%s" % (weather_api_token, latitude, longitude, weather_lang, weather_unit)
-
-            r = requests.get(weather_req_url)
-            weather_obj = json.loads(r.text)
-
-            degree_sign= u'\N{DEGREE SIGN}'
-            temperature2 = "%s%s" % (str(int(weather_obj['currently']['temperature'])), degree_sign)
-            currently2 = weather_obj['currently']['summary']
-            forecast2 = weather_obj["hourly"]["summary"]
-
-            icon_id = weather_obj['currently']['icon']
+            temperature2 = "%s" % (temp)
             icon2 = None
 
             if icon_id in icon_lookup:
