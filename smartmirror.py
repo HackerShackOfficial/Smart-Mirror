@@ -42,20 +42,74 @@ def setlocale(name): #thread proof function to work with locale
 # maps open weather icons to
 # icon reading is not impacted by the 'lang' parameter
 icon_lookup = {
-    'clear-day': "assets/Sun.png",  # clear sky day
-    'wind': "assets/Wind.png",   #wind
-    'cloudy': "assets/Cloud.png",  # cloudy day
-    'partly-cloudy-day': "assets/PartlySunny.png",  # partly cloudy day
-    'rain': "assets/Rain.png",  # rain day
-    'snow': "assets/Snow.png",  # snow day
-    'snow-thin': "assets/Snow.png",  # sleet day
-    'fog': "assets/Haze.png",  # fog day
-    'clear-night': "assets/Moon.png",  # clear sky night
-    'partly-cloudy-night': "assets/PartlyMoon.png",  # scattered clouds night
-    'thunderstorm': "assets/Storm.png",  # thunderstorm
-    'tornado': "assests/Tornado.png",    # tornado
-    'hail': "assests/Hail.png"  # hail
+    #32 36 'clear-day': "assets/Sun.png",  # clear sky day
+    #15 19 23 24 25 'wind': "assets/Wind.png",   #wind
+    #20 21 22 26 'cloudy' : "assets/Cloud.png",  # cloudy day
+    #28 30 34 'partly-cloudy-day': "assets/PartlySunny.png",  # partly cloudy day
+    #9 8 10 11 12 18 39 40 45 'rain': "assets/Rain.png",  # rain day
+    #5 6 7 13 14 16 41 42 43 46 'snow': "assets/Snow.png",  # snow day
+    #44 'fog': "assets/Haze.png",  # fog day
+    #31 'clear-night': "assets/Moon.png",  # clear sky night
+    #27 29 33 'partly-cloudy-night': "assets/PartlyMoon.png",  # scattered clouds night
+    #3 4 37 38 47 'thunderstorm': "assets/Storm.png",  # thunderstorm
+    #1 2 'tornado': "assests/Tornado.png",    # tornado
+    #17 35 'hail': "assests/Hail.png"  # hail
+    1: "assests/Tornado.png",
+    2: "assests/Tornado.png",
+    3: "assets/Storm.png",
+    4: "assets/Storm.png",
+    5: "assets/Snow.png",
+    6: "assets/Snow.png",
+    7: "assets/Snow.png",
+    8: "assets/Rain.png",
+    9: "assets/Rain.png",
+    10: "assets/Rain.png",
+    11: "assets/Rain.png",
+    12: "assets/Rain.png",
+    13: "assets/Snow.png",
+    14: "assets/Snow.png",
+    15: "assets/Wind.png",
+    16: "assets/Snow.png",
+    17: "assests/Hail.png",
+    18: "assets/Rain.png",
+    19: "assets/Wind.png",
+    20: "assets/Cloud.png",
+    21: "assets/Cloud.png",
+    22: "assets/Cloud.png",
+    23: "assets/Wind.png",
+    24: "assets/Wind.png",
+    25: "assets/Wind.png",
+    26: "assets/Cloud.png",
+    27: "assets/PartlyMoon.png",
+    28: "assets/PartlySunny.png",
+    29: "assets/PartlyMoon.png",
+    30: "assets/PartlySunny.png",
+    31: "assets/Moon.png",
+    32: "assets/Sun.png",
+    33: "assets/PartlyMoon.png",
+    34: "assets/PartlySunny.png",
+    35: "assests/Hail.png",
+    36: "assets/Sun.png",
+    37: "assets/Storm.png",
+    38: "assets/Storm.png",
+    39: "assets/Rain.png",
+    40: "assets/Rain.png",
+    41: "assets/Snow.png",
+    42: "assets/Snow.png",
+    43: "assets/Snow.png",
+    44: "assets/Haze.png",
+    45: "assets/Rain.png",
+    46: "assets/Snow.png",
+    47: "assets/Storm.png"
 }
+
+
+
+
+
+
+
+
 
 
 class Clock(Frame):
