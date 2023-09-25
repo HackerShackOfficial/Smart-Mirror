@@ -31,7 +31,7 @@ sudo apt-get install python-imaging-tk
 pip install bs4
 ```
 
-### Add your api token
+### Add your weather-underground url
 Go to https://www.wunderground.com  
 search for your location  
 copy the url and paste it into line 27 of smartmirror.py
@@ -44,15 +44,6 @@ the url should look like this
 weather_url = "https://www.wunderground.com/weather/us/il/chicago"
 ```
 
-
-Make sure vim is installed on your system: `sudo apt-get install vim`
-Use `vim` to edit you file
-
-```
-vim smartmirror.py
-```
-
-replace `weather_api_token` with the token you got from forecast.io
 
 ## Running
 To run the application run the following command in this folder
