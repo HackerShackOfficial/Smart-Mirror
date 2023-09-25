@@ -29,6 +29,19 @@ sudo apt-get install python-imaging-tk
 ```
 
 ### Add your api token
+Go to https://www.wunderground.com 
+search for your location
+copy the url and paste it into line 27 of smartmirror.py
+
+```
+weather_url = "https://www.wunderground.com/...." ############# put weather underground url here ###################
+```
+the url should look like this
+```[
+https://www.wunderground.com/weather/us/il/chicago
+```
+
+
 Make sure vim is installed on your system: `sudo apt-get install vim`
 Use `vim` to edit you file
 
