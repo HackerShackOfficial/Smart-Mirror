@@ -208,7 +208,7 @@ class Weather(Frame):
     def get_weather(self):
         try:
 
-           temp,currently2,forecast2,location2,icon_id = getWeather()
+            temp,currently2,forecast2,location2,icon_id = getWeather()
 
             temperature2 = "%s" % (temp)
             icon2 = None
