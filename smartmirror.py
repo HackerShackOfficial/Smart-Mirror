@@ -14,13 +14,17 @@ import feedparser
 from PIL import Image, ImageTk
 from contextlib import contextmanager
 
+# to parse weather underground html
+from bs4 import BeautifulSoup 
+import urllib.request
+
 LOCALE_LOCK = threading.Lock()
 
 ui_locale = '' # e.g. 'fr_FR' fro French, '' as default
 time_format = 12 # 12 or 24
 date_format = "%b %d, %Y" # check python doc for strftime() for options
 news_country_code = 'us'
-weather_url = "https://www.wunderground.com/weather/us/mn/lakeville" 
+weather_url = "https://www.wunderground.com/...." ############# put weather underground url here ###################
 xlarge_text_size = 94
 large_text_size = 48
 medium_text_size = 28
@@ -38,18 +42,6 @@ def setlocale(name): #thread proof function to work with locale
 # maps open weather icons to
 # icon reading is not impacted by the 'lang' parameter
 icon_lookup = {
-    #32 36 'clear-day': "assets/Sun.png",  # clear sky day
-    #15 19 23 24 25 'wind': "assets/Wind.png",   #wind
-    #20 21 22 26 'cloudy' : "assets/Cloud.png",  # cloudy day
-    #28 30 34 'partly-cloudy-day': "assets/PartlySunny.png",  # partly cloudy day
-    #9 8 10 11 12 18 39 40 45 'rain': "assets/Rain.png",  # rain day
-    #5 6 7 13 14 16 41 42 43 46 'snow': "assets/Snow.png",  # snow day
-    #44 'fog': "assets/Haze.png",  # fog day
-    #31 'clear-night': "assets/Moon.png",  # clear sky night
-    #27 29 33 'partly-cloudy-night': "assets/PartlyMoon.png",  # scattered clouds night
-    #3 4 37 38 47 'thunderstorm': "assets/Storm.png",  # thunderstorm
-    #1 2 'tornado': "assests/Tornado.png",    # tornado
-    #17 35 'hail': "assests/Hail.png"  # hail
     1: "assests/Tornado.png",
     2: "assests/Tornado.png",
     3: "assets/Storm.png",
@@ -100,6 +92,7 @@ icon_lookup = {
 }
 
 def getWeather():
+    # get weather underground html
     fp = urllib.request.urlopen(weather_url)
     mybytes = fp.read()
     mystr = mybytes.decode("utf8")
@@ -107,18 +100,23 @@ def getWeather():
 
     doc = BeautifulSoup(mystr, "html.parser")
 
-    attemp = doc.find('div', class_= "condition-icon small-6 medium-12 columns")
-    current = attemp.find('p').string
+    # get current conditions
+    current = doc.find('div', class_= "condition-icon small-6 medium-12 columns")
+    current = current.find('p').string
 
-    attemp = doc.find('span', class_= "wu-value wu-value-to")
-    temp = attemp.string
+    # get current tempurature
+    temp = doc.find('span', class_= "wu-value wu-value-to")
+    temp = temp.string
 
+    # get forecast
     forecast = (doc.find('p', class_= "weather-quickie")).text
 
+    # get location
     location = doc.find('title')
     location = location.string
     location = (location.split(","))[0]
 
+    # get icon id 
     icon = doc.find("div", class_="condition-icon small-6 medium-12 columns")
     x = str(icon).index(".svg")
     y = str(icon)[x-2:x]
