@@ -1,3 +1,4 @@
 requests
 feedparser
 Pillow
+bs4 (beatufiful soup)

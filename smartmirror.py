@@ -2,7 +2,7 @@
 # requirements
 # requests, feedparser, traceback, Pillow
 
-from Tkinter import *
+from tkinter import *
 import locale
 import threading
 import time
@@ -14,17 +14,17 @@ import feedparser
 from PIL import Image, ImageTk
 from contextlib import contextmanager
 
+# to parse weather underground html
+from bs4 import BeautifulSoup 
+import urllib.request
+
 LOCALE_LOCK = threading.Lock()
 
 ui_locale = '' # e.g. 'fr_FR' fro French, '' as default
 time_format = 12 # 12 or 24
 date_format = "%b %d, %Y" # check python doc for strftime() for options
 news_country_code = 'us'
-weather_api_token = '<TOKEN>' # create account at https://darksky.net/dev/
-weather_lang = 'en' # see https://darksky.net/dev/docs/forecast for full list of language parameters values
-weather_unit = 'us' # see https://darksky.net/dev/docs/forecast for full list of unit parameters values
-latitude = None # Set this if IP location lookup does not work for you (must be a string)
-longitude = None # Set this if IP location lookup does not work for you (must be a string)
+weather_url = "https://www.wunderground.com/...." ############# put weather underground url here ###################
 xlarge_text_size = 94
 large_text_size = 48
 medium_text_size = 28
@@ -42,20 +42,97 @@ def setlocale(name): #thread proof function to work with locale
 # maps open weather icons to
 # icon reading is not impacted by the 'lang' parameter
 icon_lookup = {
-    'clear-day': "assets/Sun.png",  # clear sky day
-    'wind': "assets/Wind.png",   #wind
-    'cloudy': "assets/Cloud.png",  # cloudy day
-    'partly-cloudy-day': "assets/PartlySunny.png",  # partly cloudy day
-    'rain': "assets/Rain.png",  # rain day
-    'snow': "assets/Snow.png",  # snow day
-    'snow-thin': "assets/Snow.png",  # sleet day
-    'fog': "assets/Haze.png",  # fog day
-    'clear-night': "assets/Moon.png",  # clear sky night
-    'partly-cloudy-night': "assets/PartlyMoon.png",  # scattered clouds night
-    'thunderstorm': "assets/Storm.png",  # thunderstorm
-    'tornado': "assests/Tornado.png",    # tornado
-    'hail': "assests/Hail.png"  # hail
+    1: "assests/Tornado.png",
+    2: "assests/Tornado.png",
+    3: "assets/Storm.png",
+    4: "assets/Storm.png",
+    5: "assets/Snow.png",
+    6: "assets/Snow.png",
+    7: "assets/Snow.png",
+    8: "assets/Rain.png",
+    9: "assets/Rain.png",
+    10: "assets/Rain.png",
+    11: "assets/Rain.png",
+    12: "assets/Rain.png",
+    13: "assets/Snow.png",
+    14: "assets/Snow.png",
+    15: "assets/Wind.png",
+    16: "assets/Snow.png",
+    17: "assests/Hail.png",
+    18: "assets/Rain.png",
+    19: "assets/Wind.png",
+    20: "assets/Cloud.png",
+    21: "assets/Cloud.png",
+    22: "assets/Cloud.png",
+    23: "assets/Wind.png",
+    24: "assets/Wind.png",
+    25: "assets/Wind.png",
+    26: "assets/Cloud.png",
+    27: "assets/PartlyMoon.png",
+    28: "assets/PartlySunny.png",
+    29: "assets/PartlyMoon.png",
+    30: "assets/PartlySunny.png",
+    31: "assets/Moon.png",
+    32: "assets/Sun.png",
+    33: "assets/PartlyMoon.png",
+    34: "assets/PartlySunny.png",
+    35: "assests/Hail.png",
+    36: "assets/Sun.png",
+    37: "assets/Storm.png",
+    38: "assets/Storm.png",
+    39: "assets/Rain.png",
+    40: "assets/Rain.png",
+    41: "assets/Snow.png",
+    42: "assets/Snow.png",
+    43: "assets/Snow.png",
+    44: "assets/Haze.png",
+    45: "assets/Rain.png",
+    46: "assets/Snow.png",
+    47: "assets/Storm.png"
 }
+
+def getWeather():
+    # get weather underground html
+    fp = urllib.request.urlopen(weather_url)
+    mybytes = fp.read()
+    mystr = mybytes.decode("utf8")
+    fp.close()
+
+    # set doc to html
+    doc = BeautifulSoup(mystr, "html.parser")
+
+    # get location
+    location = doc.find('title')
+    location = location.string
+    location = (location.split(","))[0]
+
+    # set doc to "city conditions" div
+    doc = doc.find("div",class_= "city-conditions row collapse ng-star-inserted") 
+    
+    # get current conditions
+    current = doc.find('div', class_= "condition-icon small-6 medium-12 columns")
+    current = current.find('p').string
+
+    # get current tempurature
+    temp = doc.find('span', class_= "wu-value wu-value-to")
+    temp = temp.string
+
+    # get forecast
+    forecast = (doc.find('p', class_= "weather-quickie")).text
+
+    # get icon id 
+    icon = doc.find("div", class_="condition-icon small-6 medium-12 columns")
+    x = str(icon).index(".svg")
+    y = str(icon)[x-2:x]
+    j = []
+    for item in y:
+        if item.isnumeric() == False:
+            continue
+        j.append(item)
+    icon = int("".join(j))
+            
+    return (temp,current,forecast,location,icon)
+
 
 
 class Clock(Frame):
@@ -135,33 +212,9 @@ class Weather(Frame):
     def get_weather(self):
         try:
 
-            if latitude is None and longitude is None:
-                # get location
-                location_req_url = "http://freegeoip.net/json/%s" % self.get_ip()
-                r = requests.get(location_req_url)
-                location_obj = json.loads(r.text)
+            temp,currently2,forecast2,location2,icon_id = getWeather()
 
-                lat = location_obj['latitude']
-                lon = location_obj['longitude']
-
-                location2 = "%s, %s" % (location_obj['city'], location_obj['region_code'])
-
-                # get weather
-                weather_req_url = "https://api.darksky.net/forecast/%s/%s,%s?lang=%s&units=%s" % (weather_api_token, lat,lon,weather_lang,weather_unit)
-            else:
-                location2 = ""
-                # get weather
-                weather_req_url = "https://api.darksky.net/forecast/%s/%s,%s?lang=%s&units=%s" % (weather_api_token, latitude, longitude, weather_lang, weather_unit)
-
-            r = requests.get(weather_req_url)
-            weather_obj = json.loads(r.text)
-
-            degree_sign= u'\N{DEGREE SIGN}'
-            temperature2 = "%s%s" % (str(int(weather_obj['currently']['temperature'])), degree_sign)
-            currently2 = weather_obj['currently']['summary']
-            forecast2 = weather_obj["hourly"]["summary"]
-
-            icon_id = weather_obj['currently']['icon']
+            temperature2 = "%s" % (temp)
             icon2 = None
 
             if icon_id in icon_lookup:
