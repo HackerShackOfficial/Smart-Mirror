@@ -98,8 +98,17 @@ def getWeather():
     mystr = mybytes.decode("utf8")
     fp.close()
 
+    # set doc to html
     doc = BeautifulSoup(mystr, "html.parser")
 
+    # get location
+    location = doc.find('title')
+    location = location.string
+    location = (location.split(","))[0]
+
+    # set doc to "city conditions" div
+    doc = doc.find("div",class_= "city-conditions row collapse ng-star-inserted") 
+    
     # get current conditions
     current = doc.find('div', class_= "condition-icon small-6 medium-12 columns")
     current = current.find('p').string
@@ -110,11 +119,6 @@ def getWeather():
 
     # get forecast
     forecast = (doc.find('p', class_= "weather-quickie")).text
-
-    # get location
-    location = doc.find('title')
-    location = location.string
-    location = (location.split(","))[0]
 
     # get icon id 
     icon = doc.find("div", class_="condition-icon small-6 medium-12 columns")
